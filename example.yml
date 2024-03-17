@@ -1,0 +1,48 @@
+esphome:
+  name: desky
+  friendly_name: Standing Desk Control
+
+esp32:
+  board: esp32dev
+  framework:
+    type: arduino
+
+# Enable Home Assistant API
+api:
+  encryption:
+    key: # ENTER KEY
+
+ota:
+  password: # ENTER PASSWORD
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: "Desky Fallback Hotspot"
+    password: # ENTER PASSWORD
+
+  manual_ip:
+    static_ip: 10.0.0.214
+    gateway: 10.0.0.1
+    subnet: 255.255.255.0
+
+captive_portal:
+
+## Copy-paste the follow section into your new device template
+
+packages:
+  remote_package:
+    url: https://github.com/at-karan-sharma/autonomous-desk-esphome
+    ref: main
+    file: config/desky.yml
+    refresh: 1d
+
+## Double-check and replace these values as needed
+substitutions:
+  uart_tx_pin: "17"
+  uart_rx_pin: "16"
+  desk_min_height: "66"
+  desk_max_height: "131"

@@ -1,0 +1,291 @@
+
+substitutions:
+  uart_tx_pin: "17"
+  uart_rx_pin: "16"
+  desk_min_height: "66"
+  desk_max_height: "131"
+
+# Known bug: After setting the height via controller, the controller continues to send conflicting instructions for a while.
+#            That means you must wait for 30s after using the controller, in order to use this integration.
+#            E.g. the height cannot be saved via the template select, or nudged up/down until 30s elapse from using the controller.
+uart:
+  id: "desk_uart"
+  tx_pin: ${uart_tx_pin}
+  rx_pin: ${uart_rx_pin}
+  baud_rate: 9600
+  parity: NONE
+  stop_bits: 1
+  data_bits: 8
+  debug:
+    direction: RX
+    dummy_receiver: true
+    after:
+      bytes: 12
+    sequence:
+      - lambda: |-
+          // UARTDebug::log_hex(direction, bytes, ':');
+
+          static int iterations_motionless = 0;
+          const int MOVING_THRESHOLD = 2;
+          const int RX_DATA_LEN = 6;
+          const size_t buffer_len = bytes.size();
+
+          for (size_t i = buffer_len - RX_DATA_LEN; i > 0; --i)
+          {
+            const auto& byte1 = bytes[i];
+            const auto& byte2 = bytes[i + 1];
+            const auto& byte3 = bytes[i + 2];
+            const auto& byte4 = bytes[i + 3];
+            const auto& byte5 = bytes[i + 4];
+
+            if ((byte1 == 0x98 && byte2 == 0x98) &&
+              ((byte3 == 0x00 && byte4 == 0x00) || (byte3 == 0x03 && byte4 == 0x03)))
+            {
+              int height = byte5;
+              if (id(desk_height).state != height)
+              {
+                id(desk_height).publish_state(height);
+                id(desk_moving).publish_state(true);
+                iterations_motionless = 0;
+              }
+              else
+              {
+                if (++iterations_motionless >= MOVING_THRESHOLD) {
+                  id(desk_moving).publish_state(false);
+                  iterations_motionless = MOVING_THRESHOLD;
+                }
+              }
+              break;
+            }
+          }
+
+switch:
+  - platform: template
+    id: "emit_noops"
+    internal: true
+    optimistic: true
+
+  - platform: template
+    id: "lock_input_from_select"
+    internal: true
+    optimistic: true
+
+button:
+  - platform: template
+    name: "Stop"
+    id: "desk_noop"
+    internal: true
+    on_press:
+      - uart.write: [0xD8, 0xD8, 0x66, 0x00, 0x00]
+
+  - platform: template
+    name: "Nudge Up"
+    id: "desk_up"
+    icon: "mdi:arrow-up-bold-box-outline"
+    on_press:
+      - logger.log: Moving desk up ...
+      - button.press: desk_noop
+      - uart.write: [0xD8, 0xD8, 0x66, 0x02, 0x02]
+      - delay: 50ms
+      - button.press: desk_noop
+      - uart.write: [0xD8, 0xD8, 0x66, 0x02, 0x02]
+
+  - platform: template
+    name: "Nudge Down"
+    id: "desk_down"
+    icon: "mdi:arrow-down-bold-box-outline"
+    on_press:
+      - logger.log: Moving desk down ...
+      - button.press: desk_noop
+      - uart.write: [0xD8, 0xD8, 0x66, 0x01, 0x01]
+      - delay: 50ms
+      - button.press: desk_noop
+      - uart.write: [0xD8, 0xD8, 0x66, 0x01, 0x01]
+
+interval:
+  - interval: 500ms
+    then:
+      - lambda: |-
+          if (id(emit_noops).state)
+          {
+            id(desk_noop).press();
+          }
+
+number:
+  - platform: template
+    name: "Height"
+    id: "desk_height"
+    icon: "mdi:human-male-height-variant"
+    min_value: ${desk_min_height} # Note -- as per this (project)[https://gist.github.com/developit/d610e45a522810b5287db61e554ae9c9], 75 was noted as the min value
+    max_value: ${desk_max_height} #        Likewise, 123 was noted as the max value.
+    step: 1
+    mode: slider
+    on_value:
+      then:
+        - sensor.template.publish:
+            id: desk_converted_height
+            state: !lambda |-
+              double y = 647614.5 - 647614.3026814 / (1 + pow((double)x / 1548255, 1.006855)); // Equation to estimate "y" found using curve-fitting
+              return round(y * 10) / 10;
+
+    set_action:
+      then:
+        - while:
+            condition:
+              - lambda: 'return id(desk_height).state + 3 < x || x < id(desk_height).state - 3;'
+            then:
+              - if:
+                  condition:
+                    - lambda: 'return x < id(desk_height).state;'
+                  then:
+                    - button.press: desk_down
+                  else:
+                    - button.press: desk_up
+              - delay: 500ms
+        - if:
+            condition:
+              - binary_sensor.is_on: desk_moving
+            then:
+              - delay: 2s
+        - while:
+            condition:
+              - lambda: 'return x != id(desk_height).state;'
+            then:
+              - if:
+                  condition:
+                    - lambda: 'return x < id(desk_height).state;'
+                  then:
+                    - button.press: desk_down
+                  else:
+                    - button.press: desk_up
+              - delay: 2s
+
+binary_sensor:
+  - platform: template
+    name: "Moving"
+    id: "desk_moving"
+    internal: true
+
+sensor:
+  - platform: template
+    name: "Height (inches)"
+    id: "desk_converted_height"
+    unit_of_measurement: "in"
+
+select:
+  - platform: template
+    name: "Jump to Memory Preset"
+    id: "desk_jump_to_memory_preset"
+    icon: "mdi:debug-step-over"
+    optimistic: true
+    options:
+      - "N/A"
+      - "1"
+      - "2"
+      - "3"
+      - "4"
+    on_value:
+      then:
+      - if:
+          condition:
+            switch.is_off: lock_input_from_select
+          then:
+          - switch.turn_on: lock_input_from_select
+          - script.execute:
+              id: go_to_memory_preset
+              preset_num: !lambda |-
+                auto active_index = id(desk_jump_to_memory_preset).active_index();
+                return active_index.has_value() ? static_cast<int>(active_index.value()) : 0;
+
+  - platform: template
+    name: "Set Height to Memory Preset"
+    id: "desk_set_to_memory_preset"
+    icon: "mdi:content-save"
+    optimistic: true
+    options:
+      - "N/A"
+      - "1"
+      - "2"
+      - "3"
+      - "4"
+    on_value:
+      then:
+        - if:
+            condition:
+              switch.is_off: lock_input_from_select
+            then:
+            - switch.turn_on: lock_input_from_select
+            - script.execute:
+                id: set_memory_preset
+                preset_num: !lambda |-
+                  auto active_index = id(desk_set_to_memory_preset).active_index();
+                  return active_index.has_value() ? static_cast<int>(active_index.value()) : 0;
+
+script:
+  - id: "go_to_memory_preset"
+    parameters:
+      preset_num: int
+    then:
+      - lambda: |-
+          if (preset_num < 1 || preset_num > 4)
+          {
+            return;
+          }
+          ESP_LOGI("main", "Jumping to preset %d ...", preset_num);
+          id(desk_noop).press();
+          const uint8_t* presetNumToCommand[] =
+          {
+              new uint8_t[5]{0xD8, 0xD8, 0x66, 0x04, 0x04},
+              new uint8_t[5]{0xD8, 0xD8, 0x66, 0x08, 0x08},
+              new uint8_t[5]{0xD8, 0xD8, 0x66, 0x10, 0x10},
+              new uint8_t[5]{0xD8, 0xD8, 0x66, 0x20, 0x20},
+          };
+          id(desk_uart).write_array(presetNumToCommand[preset_num - 1], 5);
+      - if:
+          condition:
+            lambda: 'return preset_num != 0;'
+          then:
+            - switch.turn_on: emit_noops
+            - delay: 2s
+            - wait_until:
+                condition:
+                  binary_sensor.is_off: desk_moving
+                timeout: 30s
+            - switch.turn_off: emit_noops
+            - select.set_index:
+                id: desk_jump_to_memory_preset
+                index: 0
+      - switch.turn_off: lock_input_from_select
+
+
+  - id: "set_memory_preset"
+    parameters:
+      preset_num: int
+    then:
+      - if:
+          condition:
+            lambda: 'return preset_num != 0;'
+          then:
+            - logger.log: Setting preset ...
+            - button.press: desk_noop
+            - repeat:
+                count: 68
+                then:
+                  - uart.write: [0xD8, 0xD8, 0x66, 0x40, 0x40]
+                  - delay: 50ms
+      - lambda: |-
+          if (preset_num < 1 || preset_num > 4)
+          {
+            return;
+          }
+          id(desk_noop).press();
+          const uint8_t* presetNumToCommand[] =
+          {
+              new uint8_t[5]{0xD8, 0xD8, 0x66, 0x04, 0x04},
+              new uint8_t[5]{0xD8, 0xD8, 0x66, 0x08, 0x08},
+              new uint8_t[5]{0xD8, 0xD8, 0x66, 0x10, 0x10},
+              new uint8_t[5]{0xD8, 0xD8, 0x66, 0x20, 0x20},
+          };
+          id(desk_uart).write_array(presetNumToCommand[preset_num - 1], 5);
+          id(desk_set_to_memory_preset).publish_state("N/A");
+      - switch.turn_off: lock_input_from_select
