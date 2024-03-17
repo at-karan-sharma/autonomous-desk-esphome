@@ -3,7 +3,9 @@
 This project allows you to seamlessly integrate your Autonomous SmartDesk 2 with Home Assistant via ESPHome, giving you fine-grained control over its functions while still retaining use of the controller keypad.
 
 <br/>
-<img alt="Final assembly" src="images/final-assembly.jpg" width="400" />
+<p align="center">
+  <img alt="Final assembly" src="images/final-assembly.jpg" width="400" />
+</p>
 
 ## Features
 
@@ -73,7 +75,9 @@ This project was built with reference and inspiration from [vipial1](https://git
 
    - Check if your cable's pin color layout matches the layout for the SinLoon RJ50 cable. If so, simply use its layout to identify the relevant colors.
   <br/>
-  <img alt="My SinLoon RJ50 cable as a reference" src="images/sinloon-10p10c-cable.jpg" width="400" />
+  <p align="center">
+    <img alt="My SinLoon RJ50 cable as a reference" src="images/sinloon-10p10c-cable.jpg" width="400" />
+  </p>
 
 3. Strip insulation off the 4 relevant inner wires and solder wires to them, making 3-way taps.
    - I labelled the wire ends with their respective functions because there were only red/black wires on hand.
@@ -81,16 +85,23 @@ This project was built with reference and inspiration from [vipial1](https://git
    - Pin 16 (RX) of ESP32 is connected by green wire to tapped wire for RX.
    - Pin 17 (TX) is connected by purple wire to the 1N4148 diode, with the darker end (cathode) pointed towards the ESP32 side. Other end of diode connects to TX wire.
   <br/>
-  <img alt="Breadboard layout" src="images/breadboard.jpg" width="400" />
+  <p align="center">
+    <img alt="Breadboard layout" src="images/breadboard.jpg" width="400" />
+  </p>
 5. Add shrink tubes before soldering the parts and wires to the top of the ESP32 board.
   <br/>
-  <img alt="Soldered and wrapped wiring" src="images/soldered-and-wrapped.jpg" height="400" />
+  <p align="center">
+    <img alt="Soldered and wrapped wiring" src="images/soldered-and-wrapped.jpg" height="400" />
+  </p>
 6. (Optional) Print 3D casing using the included files and assemble.
    - When assembling, use a ziptie on either end of the stripped section, before fitting it into the case. This will help the cable from coming loose.
    - I used hot glue to secure the cable into the case.
+
   <br/>
-  <img alt="Before applying hot glue" src="images/pre-hot-glue.jpg" height="300" />
-  <img alt="After applying hot glue" src="images/post-hot-glue.jpg" height="300" />
+  <p align="center">
+    <img alt="Before applying hot glue" src="images/pre-hot-glue.jpg" height="300" />
+    <img alt="After applying hot glue" src="images/post-hot-glue.jpg" height="300" />
+  </p>
 
 ### ESPHome Setup
 
