@@ -1,3 +1,16 @@
+## Copy-paste the follow section into your new device template
+
+packages:
+  Autonomous_Desk: github://at-karan-sharma/autonomous-desk-esphome/config/desky.yml@main
+
+substitutions:
+  uart_tx_pin: "17"
+  uart_rx_pin: "16"
+  desk_min_height: "66"
+  desk_max_height: "131"
+
+## User config below
+
 esphome:
   name: desky
   friendly_name: Standing Desk Control
@@ -7,7 +20,8 @@ esp32:
   framework:
     type: arduino
 
-# Enable Home Assistant API
+logger:
+
 api:
   encryption:
     key: # ENTER KEY
@@ -30,19 +44,3 @@ wifi:
     subnet: 255.255.255.0
 
 captive_portal:
-
-## Copy-paste the follow section into your new device template
-
-packages:
-  remote_package:
-    url: https://github.com/at-karan-sharma/autonomous-desk-esphome
-    ref: main
-    file: config/desky.yml
-    refresh: 1d
-
-## Double-check and replace these values as needed
-substitutions:
-  uart_tx_pin: "17"
-  uart_rx_pin: "16"
-  desk_min_height: "66"
-  desk_max_height: "131"

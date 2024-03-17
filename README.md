@@ -127,11 +127,7 @@ This project was built with reference and inspiration from [vipial1](https://git
 2. Set the remote package and substitutions by adding the following snippet. Also refer to example.yml for more info.
 ```yaml
 packages:
-  remote_package:
-    url: https://github.com/at-karan-sharma/autonomous-desk-esphome
-    ref: main
-    file: config/desky.yml
-    refresh: 1d
+  Autonomous_Desk: github://at-karan-sharma/autonomous-desk-esphome/config/desky.yml@main
 
 substitutions:
   uart_tx_pin: "17"
