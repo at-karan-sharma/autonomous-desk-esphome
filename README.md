@@ -1,26 +1,3 @@
-<style>
-  .images-row {
-    max-width: 100%;
-    height: 400px;
-    overflow: hidden;
-    margin: 0 auto;
-  }
-
-  .images-row img {
-    max-width: 50%;
-    max-height: 400px;
-    float: left;
-  }
-
-  .indent1 {
-    margin-left: 30px;
-  }
-
-  .indent2 {
-    margin-left: 70px;
-  }
-</style>
-
 # SmartDesk 2 Control for ESPHome
 
 This project allows you to seamlessly integrate your Autonomous SmartDesk 2 with Home Assistant via ESPHome, giving you fine-grained control over its functions while still retaining use of the controller keypad.
@@ -35,9 +12,8 @@ This project allows you to seamlessly integrate your Autonomous SmartDesk 2 with
 - **Read Height of Desk in Inches**: Implemented as an ESPHome text sensor
 - **Jump to Memory Preset 1-4**: Switch to one of four predefined height presets using a dropdown.
 - **Set Current Height to Memory Preset 1-4**: Save the current desk height to one of the four memory presets, also with a dropdown.
-
 <br/>
-<img alt="Integration options" src="images/integration-options.png" height="400" class="indent1" />
+<img alt="Integration options" src="images/integration-options.png" height="400" />
 
 ## Credit
 
@@ -81,8 +57,6 @@ This project was built with reference and inspiration from [vipial1](https://git
    - If using the provided 3D printable case, do not strip more than 35mm of insulation to allow for a secure fit with zipties.
 2. Identify the GND, RX, TX and 5V wires in the 10P10C cable. We will be tapping into these wires.
    - Refer to the table below to help find which pin numbers relate to which function.
-   - Check if your cable's pin color layout matches the layout for the SinLoon RJ50 cable. If so, just find the colors with the appropriate function.
-  <div class="indent2">
 
   **Pin #** | **SinLoon RJ50** | **SmartDesk 2 Cable** | **Function**
  -----------|------------------|-----------------------|--------------
@@ -97,10 +71,9 @@ This project was built with reference and inspiration from [vipial1](https://git
   9         | Gray             | Green                 | TX
   10        | White            | Blue                  | 5V
 
+   - Check if your cable's pin color layout matches the layout for the SinLoon RJ50 cable. If so, simply use its layout to identify the relevant colors.
   <br/>
   <img alt="My SinLoon RJ50 cable as a reference" src="images/sinloon-10p10c-cable.jpg" width="400" />
-
-  </div>
 
 3. Strip insulation off the 4 relevant inner wires and solder wires to them, making 3-way taps.
    - I labelled the wire ends with their respective functions because there were only red/black wires on hand.
@@ -115,11 +88,9 @@ This project was built with reference and inspiration from [vipial1](https://git
 6. (Optional) Print 3D casing using the included files and assemble.
    - When assembling, use a ziptie on either end of the stripped section, before fitting it into the case. This will help the cable from coming loose.
    - I used hot glue to secure the cable into the case.
-<br/>
-<div class="images-row indent2">
-  <img alt="Before applying hot glue" src="images/pre-hot-glue.jpg" />
-  <img alt="After applying hot glue" src="images/post-hot-glue.jpg" />
-</div>
+  <br/>
+  <img alt="Before applying hot glue" src="images/pre-hot-glue.jpg" height="300" />
+  <img alt="After applying hot glue" src="images/post-hot-glue.jpg" height="300" />
 
 ### ESPHome Setup
 
