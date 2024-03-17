@@ -84,15 +84,15 @@ This project was built with reference and inspiration from [vipial1](https://git
 4. (Recommended) Create breadboard prototype with cable attached to ESP32 to verify the whole system works. Jump ahead to [ESPHome](#esphome-setup) and [Home Assistant](#home-assistant-setup) sections for testing.
    - Pin 16 (RX) of ESP32 is connected by green wire to tapped wire for RX.
    - Pin 17 (TX) is connected by purple wire to the 1N4148 diode, with the darker end (cathode) pointed towards the ESP32 side. Other end of diode connects to TX wire.
-  <br/>
-  <p align="center">
-    <img alt="Breadboard layout" src="images/breadboard.jpg" width="400" />
-  </p>
+   <br/>
+   <p align="center">
+     <img alt="Breadboard layout" src="images/breadboard.jpg" width="400" />
+   </p>
 5. Add shrink tubes before soldering the parts and wires to the top of the ESP32 board.
-  <br/>
-  <p align="center">
-    <img alt="Soldered and wrapped wiring" src="images/soldered-and-wrapped.jpg" height="400" />
-  </p>
+   <br/>
+   <p align="center">
+     <img alt="Soldered and wrapped wiring" src="images/soldered-and-wrapped.jpg" height="400" />
+   </p>
 6. (Optional) Print 3D casing using the included files and assemble.
    - When assembling, use a ziptie on either end of the stripped section, before fitting it into the case. This will help the cable from coming loose.
    - I used hot glue to secure the cable into the case.
