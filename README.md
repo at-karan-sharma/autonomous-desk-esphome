@@ -107,16 +107,17 @@ This project was built with reference and inspiration from [vipial1](https://git
 
 1. Create a new device in ESPHome dashboard, and configure name, static ip address etc, as needed.
 2. Set the remote package and substitutions by adding the following snippet. Also refer to example.yml for more info.
-```yaml
-packages:
-  Autonomous_Desk: github://at-karan-sharma/autonomous-desk-esphome/config/desky.yml@main
+   - Note: the min/max height is based on the extended model of the SmartDesk 2. If you have the regular model, the range is probably 75-123 based on [this project](https://gist.github.com/developit/d610e45a522810b5287db61e554ae9c9).
+  ```yaml
+  packages:
+    Autonomous_Desk: github://at-karan-sharma/autonomous-desk-esphome/config/desky.yml@main
 
-substitutions:
-  uart_tx_pin: "17"
-  uart_rx_pin: "16"
-  desk_min_height: "66"
-  desk_max_height: "131"
-```
+  substitutions:
+    uart_tx_pin: "17"
+    uart_rx_pin: "16"
+    desk_min_height: "66"
+    desk_max_height: "131"
+  ```
 3. Install config to the ESP32 over wireless/serial connection.
 
 ### Home Assistant Setup

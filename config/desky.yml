@@ -116,8 +116,8 @@ number:
     name: "Height"
     id: "desk_height"
     icon: "mdi:human-male-height-variant"
-    min_value: ${desk_min_height} # Note -- as per this (project)[https://gist.github.com/developit/d610e45a522810b5287db61e554ae9c9], 75 was noted as the min value
-    max_value: ${desk_max_height} #        Likewise, 123 was noted as the max value.
+    min_value: ${desk_min_height}
+    max_value: ${desk_max_height}
     step: 1
     mode: slider
     on_value:
