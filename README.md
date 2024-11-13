@@ -81,7 +81,6 @@ This project was built with reference and inspiration from [vipial1](https://git
   </p>
 
 3. Strip insulation off the 4 relevant inner wires and solder wires to them, making 3-way taps.
-   - I labelled the wire ends with their respective functions because I only had red/black wires on hand :/
 4. (Highly recommended) Create breadboard prototype with cable attached to ESP32 to verify the whole system works. Jump ahead to [ESPHome](#esphome-setup) and [Home Assistant](#home-assistant-setup) sections for testing.
    - Pin 16 (RX) of ESP32 is connected by green wire to tapped wire for RX.
    - Pin 17 (TX) is connected by purple wire to the 1N4148 diode, with the darker end (cathode) pointed towards the ESP32 side. Other end of diode connects to TX wire.
@@ -89,6 +88,7 @@ This project was built with reference and inspiration from [vipial1](https://git
    <p align="center">
      <img alt="Breadboard layout" src="images/breadboard.jpg" width="400" />
    </p>
+   - I labelled the wire ends with their respective functions because I only had red/black wires on hand :/
 5. Add shrink tubes before soldering the parts and wires to the top of the ESP32 board.
    <br/>
    <p align="center">
