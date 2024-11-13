@@ -38,30 +38,30 @@ This project was built with reference and inspiration from [vipial1](https://git
 
 1. **ESP32 WROOM 3D development board**
 
-2. **10P10C cable**
+2. **10P10C cable**:
    I used the 1.5M version of the [SinLoon RJ50 cable](https://www.amazon.ca/gp/product/B0B1ZKCRK4/)
 
 4. **Soldering kit, wires (24 AWG) and wire stripper**
 
-5. **1N4148 diode**
+5. **1N4148 diode**:
    A 1N4148 diode is needed to continue using the keypad alongside the Home Assistant integration.
 
 #### Optional but recommended:
 
-1. **Heat-shrink tubes, electrical tape, hot glue**
+1. **Heat-shrink tubes, electrical tape, hot glue**:
     For electrical insulation and for securing cable to housing
 
-2. **Access to a 3D printer**
+2. **Access to a 3D printer**:
    To print and use the included housing STL as in the project
 
 ### Electronics setup
 
 1. Strip outer insulation of 10P10C cable.
-   - If using provided 3D printable case, do not strip more than 35mm of insulation to allow for a secure fit with zipties.
+   - If using provided 3D printable case, avoid stripping more than 35mm of insulation to allow for a secure fit.
 2. Identify GND, RX, TX and 5V wires in the 10P10C cable. We will be tapping into these wires.
-   - Refer to the table below to help find which pin numbers relate to which function.
+   - Refer to table below to find which PINs relate to which function.
 
-  **Pin #** | **SinLoon RJ50** | **SmartDesk 2 Cable** | **Function**
+  **Pin**   | **SinLoon RJ50** | **SmartDesk 2 cable** | **Function**
  -----------|------------------|-----------------------|--------------
   1         | Black            |                       |
   2         | Brown            |                       |
