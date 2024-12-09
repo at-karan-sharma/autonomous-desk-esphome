@@ -1,6 +1,6 @@
 # SmartDesk 2 Control for ESPHome
 
-Project to seamlessly integrate your Autonomous SmartDesk 2 with Home Assistant, while still retaining use of the controller keypad.
+Seamlessly integrate your Autonomous SmartDesk 2 with Home Assistant, while still retaining keypad functionality.
 
 <br/>
 <p align="center">
@@ -9,9 +9,9 @@ Project to seamlessly integrate your Autonomous SmartDesk 2 with Home Assistant,
 
 ## Features
 
-- Incrementally move desk up/down using buttons on Home Assistant
-- Change desk height using a slider
-- Read height of desk in inches
+- Incrementally move desk up/down using buttons on Home Assistant.
+- Change desk height using a slider.
+- Read height of desk in inches.
 - Switch to one of four predefined height presets using a dropdown.
 - Save the current desk height to one of the four memory presets, also with a dropdown.
 <br/>
@@ -19,7 +19,7 @@ Project to seamlessly integrate your Autonomous SmartDesk 2 with Home Assistant,
 
 ## Credit
 
-This project was built with reference and inspiration from [vipial1](https://github.com/vipial1/desky-ha), [developit](https://github.com/developit/desky), and [Stefichen5](https://github.com/Stefichen5/AutonomousControl). After failing to run the Espruino server on my esp32, I adapted the communication logic for ESPHome. This had the benefit of making the Home Assistant integration trivial. I also added support for new features, like setting memory presets and reading the desk height in inches.
+This project was built with reference and inspiration from [vipial1](https://github.com/vipial1/desky-ha), [developit](https://github.com/developit/desky), and [Stefichen5](https://github.com/Stefichen5/AutonomousControl). After failing to run the Espruino server on my ESP32, I adapted the communication logic for ESPHome. This had the benefit of making the Home Assistant integration trivial. I also added support for new features, like setting memory presets and reading the desk height in inches.
 
 ## Disclaimer
 
@@ -29,7 +29,7 @@ This project was built with reference and inspiration from [vipial1](https://git
 
 ## Limitations
 
-1. After pressing the UP/DOWN buttons on the keypad controller, certain integration features (moving to a user-defined height, memory preset save) fail until at least 30 seconds elapse. My guess is that the keypad controller sends continuous instructions for that duration, which interferes with the programmed sequence sent from the wireless controller.
+1. After pressing the UP/DOWN buttons on the keypad controller, certain integration features (moving to a user-defined height, memory preset save) fail until at least 30 seconds elapse.
 2. Moving the desk to a user-defined height is functional but imperfect. E.g. suppose the desk is at height 80 (internal units, not inches), and you set the slider to 90 -- The desk will move up until the height is 90 +/- 3 and then slowly nudge up/down until it reaches 90 exactly. Compared to the smooth motion with presets, this is more janky.
 
 ## Getting started
@@ -95,7 +95,7 @@ This project was built with reference and inspiration from [vipial1](https://git
      <img alt="Soldered and wrapped wiring" src="images/soldered-and-wrapped.jpg" height="400" />
    </p>
 6. (Optional) Print 3D casing using the included files and assemble.
-   - When assembling, use a ziptie on either end of the stripped section, before fitting it into the case with hot glue. This will help the cable from coming loose.
+   - When assembling, use a ziptie on either end of the stripped section, before fitting it into the case with hot glue. This will help prevent the cable from getting yanked out of the case.
 
   <br/>
   <p align="center">

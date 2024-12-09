@@ -5,6 +5,18 @@ substitutions:
   desk_min_height: "66"
   desk_max_height: "131"
 
+globals:
+  # Tracks number of iterations that desk remained motionless when setting a custom height
+  - id: desk_height_motionless_iterations
+    type: int
+    restore_value: no
+    initial_value: '0'
+  # Tracks last height of desk while setting a custom height
+  - id: desk_height_last_value
+    type: int
+    restore_value: no
+    initial_value: '0'
+
 # Known bug: After setting the height via controller, the controller continues to send conflicting instructions for a while.
 #            That means you must wait for 30s after using the controller, in order to use this integration.
 #            E.g. the height cannot be saved via the template select, or nudged up/down until 30s elapse from using the controller.
@@ -25,12 +37,8 @@ uart:
       - lambda: |-
           // UARTDebug::log_hex(direction, bytes, ':');
 
-          static int iterations_motionless = 0;
-          const int MOVING_THRESHOLD = 2;
           const int RX_DATA_LEN = 6;
-          const size_t buffer_len = bytes.size();
-
-          for (size_t i = buffer_len - RX_DATA_LEN; i > 0; --i)
+          for (size_t i = bytes.size() - RX_DATA_LEN; i > 0; --i)
           {
             const auto& byte1 = bytes[i];
             const auto& byte2 = bytes[i + 1];
@@ -42,18 +50,15 @@ uart:
               ((byte3 == 0x00 && byte4 == 0x00) || (byte3 == 0x03 && byte4 == 0x03)))
             {
               int height = byte5;
+              // ESP_LOGI("main", "height = %d", height);
               if (id(desk_height).state != height)
               {
                 id(desk_height).publish_state(height);
                 id(desk_moving).publish_state(true);
-                iterations_motionless = 0;
               }
               else
               {
-                if (++iterations_motionless >= MOVING_THRESHOLD) {
-                  id(desk_moving).publish_state(false);
-                  iterations_motionless = MOVING_THRESHOLD;
-                }
+                id(desk_moving).publish_state(false);
               }
               break;
             }
@@ -125,46 +130,69 @@ number:
         - sensor.template.publish:
             id: desk_converted_height
             state: !lambda |-
-              double y = 647614.5 - 647614.3026814 / (1 + pow((double)x / 1548255, 1.006855)); // Equation to estimate "y" found using curve-fitting
+              // Equation for "y" found using curve-fitting internal height values to height shown on keypad display.
+              double y = 647614.5 - 647614.3026814 / (1 + pow((double)x / 1548255, 1.006855));
               return round(y * 10) / 10;
 
     set_action:
       then:
-        - while:
-            condition:
-              - lambda: 'return id(desk_height).state + 3 < x || x < id(desk_height).state - 3;'
-            then:
-              - if:
-                  condition:
-                    - lambda: 'return x < id(desk_height).state;'
-                  then:
-                    - button.press: desk_down
-                  else:
-                    - button.press: desk_up
-              - delay: 500ms
+        # It's cleaner to implement the list below as a lambda, but delay action is not currently supported with that approach
         - if:
             condition:
-              - binary_sensor.is_on: desk_moving
+              switch.is_off: lock_input_from_select
             then:
-              - delay: 2s
-        - while:
-            condition:
-              - lambda: 'return x != id(desk_height).state;'
-            then:
-              - if:
-                  condition:
-                    - lambda: 'return x < id(desk_height).state;'
-                  then:
-                    - button.press: desk_down
-                  else:
-                    - button.press: desk_up
-              - delay: 2s
+            - lambda: |-
+                id(desk_height_motionless_iterations) = 0;
+                auto height = id(desk_height).state;
+                id(desk_height_last_value) = height;
+            - while:
+                condition:
+                  - lambda: 'return id(desk_height_motionless_iterations) < 25 && (id(desk_height).state + 3 < x || x < id(desk_height).state - 3);'
+                then:
+                  - if:
+                      condition:
+                        - lambda: 'return x < id(desk_height).state;'
+                      then:
+                        - button.press: desk_down
+                      else:
+                        - button.press: desk_up
+                  - delay: 100ms
+                  - lambda: |-
+                      auto height = id(desk_height).state;
+                      if (height == id(desk_height_last_value))
+                      {
+                        auto motionless_iterations = id(desk_height_motionless_iterations);
+                        id(desk_height_motionless_iterations) = motionless_iterations + 1;
+                      }
+                      else
+                      {
+                        id(desk_height_motionless_iterations) = 0;
+                      }
+                      id(desk_height_last_value) = height;
+            - wait_until:
+                condition:
+                  - binary_sensor.is_off: desk_moving
+                timeout: 2s
+            - while:
+                condition:
+                  - lambda: 'return id(desk_height_motionless_iterations) < 25 && (x != id(desk_height).state);'
+                then:
+                  - if:
+                      condition:
+                        - lambda: 'return x < id(desk_height).state;'
+                      then:
+                        - button.press: desk_down
+                      else:
+                        - button.press: desk_up
+                  - delay: 2s
 
 binary_sensor:
   - platform: template
     name: "Moving"
     id: "desk_moving"
     internal: true
+    filters:
+      - delayed_off: 1s
 
 sensor:
   - platform: template
@@ -188,7 +216,9 @@ select:
       then:
       - if:
           condition:
-            switch.is_off: lock_input_from_select
+            and:
+              - switch.is_off: lock_input_from_select
+              - binary_sensor.is_off: desk_moving
           then:
           - switch.turn_on: lock_input_from_select
           - script.execute:
@@ -196,6 +226,18 @@ select:
               preset_num: !lambda |-
                 auto active_index = id(desk_jump_to_memory_preset).active_index();
                 return active_index.has_value() ? static_cast<int>(active_index.value()) : 0;
+          - script.wait: go_to_memory_preset
+          - lambda: |-
+              id(desk_jump_to_memory_preset).publish_state("N/A");
+          - switch.turn_off: lock_input_from_select
+          else:
+            - delay: 100ms
+            - lambda: |-
+                auto active_index = id(desk_jump_to_memory_preset).active_index();
+                const int index = active_index.has_value() ? static_cast<int>(active_index.value()) : 0;
+                if (index > 0) {
+                  id(desk_jump_to_memory_preset).publish_state("N/A");
+                }
 
   - platform: template
     name: "Set Height to Memory Preset"
@@ -212,7 +254,9 @@ select:
       then:
         - if:
             condition:
-              switch.is_off: lock_input_from_select
+              and:
+                - switch.is_off: lock_input_from_select
+                - binary_sensor.is_off: desk_moving
             then:
             - switch.turn_on: lock_input_from_select
             - script.execute:
@@ -220,6 +264,18 @@ select:
                 preset_num: !lambda |-
                   auto active_index = id(desk_set_to_memory_preset).active_index();
                   return active_index.has_value() ? static_cast<int>(active_index.value()) : 0;
+            - script.wait: set_memory_preset
+            - lambda: |-
+                id(desk_set_to_memory_preset).publish_state("N/A");
+            - switch.turn_off: lock_input_from_select
+            else:
+              - delay: 100ms
+              - lambda: |-
+                  auto active_index = id(desk_set_to_memory_preset).active_index();
+                  const int index = active_index.has_value() ? static_cast<int>(active_index.value()) : 0;
+                  if (index > 0) {
+                    id(desk_set_to_memory_preset).publish_state("N/A");
+                  }
 
 script:
   - id: "go_to_memory_preset"
@@ -252,11 +308,6 @@ script:
                   binary_sensor.is_off: desk_moving
                 timeout: 30s
             - switch.turn_off: emit_noops
-            - select.set_index:
-                id: desk_jump_to_memory_preset
-                index: 0
-      - switch.turn_off: lock_input_from_select
-
 
   - id: "set_memory_preset"
     parameters:
@@ -287,5 +338,4 @@ script:
               new uint8_t[5]{0xD8, 0xD8, 0x66, 0x20, 0x20},
           };
           id(desk_uart).write_array(presetNumToCommand[preset_num - 1], 5);
-          id(desk_set_to_memory_preset).publish_state("N/A");
-      - switch.turn_off: lock_input_from_select
+
