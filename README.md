@@ -16,7 +16,6 @@ Seamlessly integrate your Autonomous SmartDesk 2 with Home Assistant, while stil
 - Read height of desk in inches.
 - Switch to one of four height presets using a dropdown.
 - Save the current desk height to one of the four memory presets, also with a dropdown.
-<br/>
 
 ## Credit
 
@@ -87,11 +86,11 @@ After failing to run the Espruino server on my ESP32, I adapted the communicatio
 4. (Optional but highly recommended) Create breadboard prototype with cable attached to ESP32 to verify the whole system works. Jump ahead to [ESPHome](#esphome-setup) and [Home Assistant](#home-assistant-setup) sections for testing.
    - Pin 16 (RX) of ESP32 is connected by green wire to tapped wire for RX.
    - Pin 17 (TX) is connected by purple wire to the 1N4148 diode, with the darker end (cathode) pointed towards the ESP32 side. Other end of diode connects to TX wire.
+   - I labelled the wire ends with their respective functions because I only had red/black wires on hand :/
    <br/>
    <p align="center">
      <img alt="Breadboard layout" src="images/breadboard.jpg" width="400" />
    </p>
-   - I labelled the wire ends with their respective functions because I only had red/black wires on hand :/
 5. Add shrink tubes before soldering the parts and wires to the top of the ESP32 board.
    <br/>
    <p align="center">
@@ -131,4 +130,4 @@ After failing to run the Espruino server on my ESP32, I adapted the communicatio
 
 ## Contribution
 
-Feel free to contribute to this project by submitting issues or pull requests. Feedback and suggestions are also welcomed.
+Feel free to contribute to this project by submitting issues or pull requests. Feedback and suggestions are also welcome.
